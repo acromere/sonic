@@ -11,19 +11,20 @@
 		<version>1.0</version>
 	</parent>
 
-	<groupId>com.dakkra</groupId>
-	<artifactId>hypersynesthesia</artifactId>
+	<groupId>com.acromere</groupId>
+	<artifactId>sonic</artifactId>
 	<version>0.0.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<organization>
-		<name>Dakkra Studio LLC</name>
-		<url>https://hypersynesthesia.com</url>
+		<name>Acromere</name>
+		<url>https://acromere.com</url>
 	</organization>
 
-	<name>HyperSynesthesia</name>
+	<name>Sonic Candle</name>
 	<description>Application to generate video from audio</description>
 	<inceptionYear>2023</inceptionYear>
+	<url>https://soniccandle.org</url>
 
 	<repositories>
 		<repository>
@@ -394,7 +395,7 @@
 					</plugin>
 
 					<plugin>
-						<!-- This is HyperSynesthesia the application, not the module -->
+						<!-- This is Sonic Candle the application, not the module -->
 						<artifactId>maven-assembly-plugin</artifactId>
 						<executions>
 							<!-- Assemble the product pack -->
