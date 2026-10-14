@@ -27,12 +27,12 @@ public class LifeCycleTest extends HyperSynesthesiaTest {
 
 	@Test
 	void testModCardName() {
-		assertEquals( "HyperSynesthesia", getMod().getCard().getName() );
+		assertEquals( "Sonic Candle", getMod().getCard().getName() );
 	}
 
 	@Test
 	void testModCardArtifact() {
-		assertEquals( "hypersynesthesia", getMod().getCard().getArtifact() );
+		assertEquals( "sonic", getMod().getCard().getArtifact() );
 	}
 
 }
