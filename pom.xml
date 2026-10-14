@@ -29,14 +29,14 @@
 	<repositories>
 		<repository>
 			<id>acm</id>
-			<url>https://repo.acromere.com/acm</url>
+			<url>https://repo.acromere.com/acm/</url>
 		</repository>
 	</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
 			<id>acm</id>
-			<url>https://repo.acromere.com/acm</url>
+			<url>https://repo.acromere.com/acm/</url>
 		</pluginRepository>
 	</pluginRepositories>
 
