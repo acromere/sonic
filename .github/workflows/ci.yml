@@ -81,10 +81,10 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: hypersynesthesia-artifacts
+          name: soniccandle-artifacts
           path: |
             src/main/etc/market/catalog.card
-            src/main/etc/market/hypersynesthesia-icon.png
+            src/main/etc/market/soniccandle-icon.png
             target/main/java/META-INF/product.card
             target/product.jar
 
@@ -110,7 +110,7 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v8
         with:
-          name: hypersynesthesia-artifacts
+          name: soniccandle-artifacts
 
       - name: Deploy catalog card
         run: |
@@ -124,7 +124,7 @@ jobs:
         run: |
           ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest;"
           if [ $? -ne 0 ]; then exit 1; fi
-          scp -r src/main/etc/market/hypersynesthesia-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/icon
+          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/icon
           if [ $? -ne 0 ]; then exit 1; fi
           ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/icon;"
 
@@ -148,7 +148,7 @@ jobs:
         run: |
           ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
           if [ $? -ne 0 ]; then exit 1; fi
-          scp -r src/main/etc/market/hypersynesthesia-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon
+          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon
           if [ $? -ne 0 ]; then exit 1; fi
           ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon;"
 
@@ -211,7 +211,7 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v8
         with:
-          name: hypersynesthesia-artifacts
+          name: soniccandle-artifacts
           path: target
 
       # NEXT Modify the artifacts
@@ -293,7 +293,7 @@ jobs:
 #      - name: Download Artifacts
 #        uses: actions/download-artifact@v8
 #        with:
-#          name: hypersynesthesia-artifacts
+#          name: soniccandle-artifacts
 #          path: target
 #
 #      - name: UI Tests
@@ -386,7 +386,7 @@ jobs:
 #      - name: Download Artifacts
 #        uses: actions/download-artifact@v8
 #        with:
-#          name: hypersynesthesia-artifacts
+#          name: soniccandle-artifacts
 #          path: target
 #
 #      - name: UI Tests
