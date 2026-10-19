@@ -16,7 +16,7 @@ public class HSLogo extends Pane {
 	private static final double HEIGHT = 256;
 
 	public HSLogo() {
-		ImageView view = new ImageView( new Image( "/hs-logo.png", WIDTH, HEIGHT, true, true ) );
+		ImageView view = new ImageView( new Image( "/soniccandle-icon.png", WIDTH, HEIGHT, true, true ) );
 		getChildren().addAll( view );
 		setWidth( WIDTH );
 		setHeight( HEIGHT );

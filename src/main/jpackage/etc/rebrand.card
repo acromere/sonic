@@ -4,36 +4,34 @@
 	"version": "${project.version}",
 	"timestamp": "${project.timestamp}",
 	"packaging": "mod",
-	"icons": [
-		"${project.artifactId}",
-		"https://hypersynesthesia.com/download/xenon/market/latest/hypersynesthesia/linux/product/icon"
-	],
+	"icons": [ "${project.artifactId}", "https://acromere.com/download/latest/${project.artifactId}/product/icon" ],
 	"name": "${project.name}",
 	"provider": "${project.organization.name}",
 	"providerUrl": "${project.organization.url}",
 	"inception": "${project.inceptionYear}",
-	"summary": "A mod to create videos based on audio input",
+	"summary": "A module to create videos based on audio input",
 	"description": "${project.description}",
-	"copyrightSummary": "(c) 2023 Eurydice M. Soderquist",
+	"copyrightSummary": "(c) 2026 Acromere",
 	"licenseSummary": "${project.name} is under the GPL v3 license",
 	"javaVersion": "25",
 	"maintainers": [
 		{
-			"name": "Eurydice Soderquist",
-			"email": "contact@dakkra.com",
+			"name": "Mark Soderquist",
+			"email": "mark@soderquist.net",
 			"timezone": "MDT",
-			"organization": "Dakkra Studio LLC",
-			"organizationUrl": "https://dakkra.com",
+			"organization": "Acromere",
+			"organizationUrl": "https://acromere.com",
 			"roles": [
 				"Architect",
 				"Developer"
 			]
 		},
 		{
-			"name": "Mark Soderquist",
-			"email": "mark@soderquist.net",
+			"name": "Eurydice Soderquist",
+			"email": "izzy@soderquist.net",
 			"timezone": "MDT",
 			"roles": [
+				"Architect",
 				"Developer"
 			]
 		}

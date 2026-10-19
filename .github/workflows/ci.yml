@@ -139,11 +139,11 @@ jobs:
         run: |
           mvn ${{env.MAVEN_PARMS}} deploy -Dmaven.test.skip=true
 
-      - name: Publish Icons
-        run: |
-          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
-          if [ $? -ne 0 ]; then exit 1; fi
-          scp -B target/main/images/product*.png ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
+#      - name: Publish Icons
+#        run: |
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -B target/main/images/product*.png ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
 
       - name: Publish JavaDoc
         run: |
