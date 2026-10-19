@@ -142,29 +142,29 @@
 				</configuration>
 			</plugin>
 
-			<!--					<plugin>-->
-			<!--						<groupId>com.acromere</groupId>-->
-			<!--						<artifactId>cameo</artifactId>-->
-			<!--						<version>${cameo.version}</version>-->
-			<!--						<executions>-->
-			<!--							<execution>-->
-			<!--								<id>render</id>-->
-			<!--								<phase>prepare-package</phase>-->
-			<!--								<goals>-->
-			<!--									<goal>render</goal>-->
-			<!--								</goals>-->
-			<!--								<configuration>-->
-			<!--									<images>-->
-			<!--										<image>-->
-			<!--											<class>com.acromere.cartesia.icon.CartesiaIcon</class>-->
-			<!--											<target>${images-folder}/product.png</target>-->
-			<!--											<theme>light</theme>-->
-			<!--										</image>-->
-			<!--									</images>-->
-			<!--								</configuration>-->
-			<!--							</execution>-->
-			<!--						</executions>-->
-			<!--					</plugin>-->
+			<plugin>
+				<groupId>com.acromere</groupId>
+				<artifactId>cameo</artifactId>
+				<version>${cameo.version}</version>
+				<executions>
+					<execution>
+						<id>render</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>render</goal>
+						</goals>
+						<configuration>
+							<images>
+								<image>
+									<class>com.dakkra.hypersynesthesia.HSLogo</class>
+									<target>${images-folder}/product.png</target>
+									<theme>light</theme>
+								</image>
+							</images>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 		</plugins>
 	</build>
