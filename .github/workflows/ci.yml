@@ -1,45 +1,67 @@
-name: Dakkra HyperSynesthesia CI
+name: Sonic Candle CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
   workflow_dispatch:
+  repository_dispatch:
+    types: dependency-trigger
+
+#permissions:
+#  actions: read
+#  contents: read
+#  security-events: write
 
 env:
+  ACM_PRODUCT: "sonic"
+  # The default release, should be overridden in config.sh
+  ACM_RELEASE: "latest"
+  # The default platform, should be overridden in the platform binaries jobs below
+  ACM_PLATFORM: "linux"
+
+  ACM_GPG_PASSWORD: ${{ secrets.ACM_GPG_PASSWORD }}
+  ACM_KEYSTORE_PASSWORD: ${{ secrets.ACM_KEYSTORE_PASSWORD }}
+  ACM_MAVEN_REPO_USERNAME: ${{ secrets.ACM_MAVEN_REPO_USERNAME }}
+  ACM_MAVEN_REPO_PASSWORD: ${{ secrets.ACM_MAVEN_REPO_PASSWORD }}
+  ACM_XENON_REPO_USERNAME: ${{ secrets.ACM_XENON_REPO_USERNAME }}
+  ACM_XENON_REPO_PASSWORD: ${{ secrets.ACM_XENON_REPO_PASSWORD }}
+
   DISPLAY: ":99"
+  GITHUB_REF: ${{ github.ref }}
   JAVA_DISTRO: "temurin"
   JAVA_VERSION: "25.0.1"
-  MAVEN_PARMS: "-B -U -V"
+  MAVEN_PARMS: "-B -U -V --settings .github/settings.xml --file pom.xml"
   XVFB_PARMS: "-screen 0 1920x1080x24 -nolisten unix"
-  PRODUCT_DEPLOY_PATH: "/var/www/html/download/xenon/market/latest/hypersynesthesia"
-
-permissions:
-  actions: read
-  contents: read
-  security-events: write
+  # PRODUCT_DEPLOY_PATH: "/var/www/html/download/xenon/market/latest/hypersynesthesia"
 
 jobs:
   build:
-    name: Build, Test, Pack
+    name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Fetch sources
         uses: actions/checkout@v7
 
+      - name: Fetch CI/CD resources
+        uses: actions/checkout@v7
+        with:
+          repository: acromere/canoe
+          path: .github
+
+      - name: Configuration
+        shell: bash
+        run: |
+          source .github/config.sh
+
+      # Required to render the product icon
       - name: Set up Virtual Display
         run: |
           Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
 
-      - name: Set up FFMPEG
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: release
-
       - name: Set up Java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v5
         with:
           distribution: ${{env.JAVA_DISTRO}}
           java-version: ${{env.JAVA_VERSION}}
@@ -60,133 +82,44 @@ jobs:
         run: |
           mvn ${{env.MAVEN_PARMS}} test
 
-      - name: Package
-        run: |
-          mvn ${{env.MAVEN_PARMS}} package -Dmaven.test.skip=true
-
-      - name: Build Module Pack
-        run: |
-          mvn ${{env.MAVEN_PARMS}} verify -Dmaven.test.skip=true -Ppacks
-
-      - name: Get Project Version
-        id: get_version
-        run: |
-          echo "RELEASE_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_ENV
-
-      #      What repo should these artifacts be deployed to?
-      #      - name: Maven Deploy
-      #        run: |
-      #          mvn ${{env.MAVEN_PARMS}} deploy -Dmaven.test.skip=true
-
-      - name: Upload Artifact
+      - name: Upload Artifacts for Next Steps
         uses: actions/upload-artifact@v7
         with:
-          name: soniccandle-artifacts
-          path: |
-            src/main/etc/market/catalog.card
-            src/main/etc/market/soniccandle-icon.png
-            target/main/java/META-INF/product.card
-            target/product.jar
+          name: build
+          path: target
 
   publish:
-    name: Publish to Market
-    runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' && github.actor != 'dependabot[bot]'
-    steps:
-      - run: mkdir build
-
-      - name: Configure SSH
-        shell: bash
-        env:
-          DEPLOYMENT_KEY: ${{ secrets.SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-        run: |
-          mkdir ~/.ssh
-          printf %s "$DEPLOYMENT_KEY" > ~/.ssh/id_rsa
-          printf %s "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: soniccandle-artifacts
-
-      - name: Deploy catalog card
-        run: |
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest;"
-          if [ $? -ne 0 ]; then exit 1; fi
-          scp -r src/main/etc/market/catalog.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/catalog
-          if [ $? -ne 0 ]; then exit 1; fi
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/catalog;"
-
-      - name: Deploy catalog icon
-        run: |
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest;"
-          if [ $? -ne 0 ]; then exit 1; fi
-          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/icon
-          if [ $? -ne 0 ]; then exit 1; fi
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/icon;"
-
-      - name: Deploy module pack
-        run: |
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
-          if [ $? -ne 0 ]; then exit 1; fi
-          scp -r target/product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/pack
-          if [ $? -ne 0 ]; then exit 1; fi
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/pack;"
-
-      - name: Deploy module card
-        run: |
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
-          if [ $? -ne 0 ]; then exit 1; fi
-          scp -r target/main/java/META-INF/product.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/card
-          if [ $? -ne 0 ]; then exit 1; fi
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/card;"
-
-      - name: Deploy module icon
-        run: |
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
-          if [ $? -ne 0 ]; then exit 1; fi
-          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon
-          if [ $? -ne 0 ]; then exit 1; fi
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon;"
-
-      - name: Support MacOS and Windows
-        run: |
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/hypersynesthesia/linux /var/www/html/download/xenon/market/latest/hypersynesthesia/macos"
-          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/hypersynesthesia/linux /var/www/html/download/xenon/market/latest/hypersynesthesia/windows"
-
-# screenshots1x:
-
-# screenshots2x:
-
-  linux:
-    needs: build
-    name: Pack Linux Binaries
+    name: Maven Publish
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    if: github.ref == 'refs/heads/main' && github.actor != 'dependabot[bot]'
-    env:
-      PRODUCT_PLATFORM: "linux"
+    timeout-minutes: 15
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/main' || github.base_ref == 'refs/heads/stable'
     steps:
       - name: Fetch sources
         uses: actions/checkout@v7
 
+      - name: Fetch CI/CD resources
+        uses: actions/checkout@v7
+        with:
+          repository: acromere/canoe
+          path: .github
+
+      - name: Configuration
+        shell: bash
+        run: |
+          source .github/config.sh
+
+      # Required to render the product icon
       - name: Set up Virtual Display
         run: |
           Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
 
-      - name: Set up FFMPEG
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: release
-
       - name: Set up Java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v5
         with:
           distribution: ${{env.JAVA_DISTRO}}
           java-version: ${{env.JAVA_VERSION}}
+          java-package: ${{env.JAVA_PACKAGE}}
 
       - name: Maven Repository Cache
         uses: actions/cache@v6
@@ -196,68 +129,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Configure SSH
-        shell: bash
-        env:
-          DEPLOYMENT_KEY: ${{ secrets.SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-        run: |
-          mkdir ~/.ssh
-          printf %s "$DEPLOYMENT_KEY" > ~/.ssh/id_rsa
-          printf %s "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_rsa
-
-      # This only gets the artifacts from the previous job
-      - name: Download Artifact
+      - name: Download Artifacts
         uses: actions/download-artifact@v8
         with:
-          name: soniccandle-artifacts
+          name: build
           path: target
 
-      # NEXT Modify the artifacts
-      - name: Modify the Xenon jar file
+      - name: Publish Artifacts
         run: |
-          ls -al target
-#          mkdir ./target/rebrand
-#          unzip -d ./target/product.jar # The hypersynesthesia jar file
+          mvn ${{env.MAVEN_PARMS}} deploy -Dmaven.test.skip=true
 
-      - name: UI Tests
+      - name: Publish Icons
         run: |
-          mvn ${{env.MAVEN_PARMS}} -P testui verify
+          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
+          if [ $? -ne 0 ]; then exit 1; fi
+          scp -B target/main/images/product*.png ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
 
-      - name: Build Application Pack
+      - name: Publish JavaDoc
         run: |
-          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -P app-pack verify
+          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.JAVADOC_DEPLOY_PATH}};"
+          if [ $? -ne 0 ]; then exit 1; fi
+          scp -B target/${ACM_PRODUCT}-*-javadoc.jar ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${{env.JAVADOC_DEPLOY_PATH}}/javadoc.jar 2>&1
+          if [ $? -ne 0 ]; then exit 1; fi
+          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.JAVADOC_TARGET_PATH}};rm -rf ${{env.JAVADOC_TARGET_PATH}}/*;cd ${{env.JAVADOC_TARGET_PATH}};jar -xf ${{env.JAVADOC_DEPLOY_PATH}}/javadoc.jar;cd -;"
+          if [ $? -ne 0 ]; then exit 1; fi
 
-      - name: Publish Install Pack
-        if: ${{ github.actor != 'dependabot[bot]' }}
-        run: |
-          scp -B target/jpackage/*.deb ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.deb 2>&1
-      #    scp -B target/jpackage/*.rpm ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.rpm 2>&1
-
-      #      - name: Publish Install Pack (izpack)
-      #  if: ${{ github.actor != 'dependabot[bot]' }}
-      #        run: |
-      #          scp -B target/*install.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.jar 2>&1
-
-      - name: Publish Product Pack
-        if: ${{ github.actor != 'dependabot[bot]' }}
-        run: |
-          scp -B target/*product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.jar 2>&1
-
-      - name: Publish Product Card
-        if: ${{ github.actor != 'dependabot[bot]' }}
-        run: |
-          scp -B target/main/java/META-INF/*.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.card 2>&1
-
-#  macos:
+#  screenshots1x:
 #    needs: build
-#    name: Pack Mac OS Binaries
-#    runs-on: macos-latest
-#    timeout-minutes: 30
+#    name: Screenshots 1x
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 5
 #    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/main' || github.base_ref == 'refs/heads/stable'
 #    env:
-#      PRODUCT_PLATFORM: "macosx"
+#      ACM_PLATFORM: "linux"
+#      XVFB_PARMS: "-screen 0 1920x1080x24 -nolisten unix"
 #    steps:
 #      - name: Fetch sources
 #        uses: actions/checkout@v7
@@ -278,83 +183,45 @@ jobs:
 #          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
 #
 #      - name: Set up Java
-#        uses: actions/setup-java@v6
+#        uses: actions/setup-java@v5
 #        with:
 #          distribution: ${{env.JAVA_DISTRO}}
 #          java-version: ${{env.JAVA_VERSION}}
 #          java-package: ${{env.JAVA_PACKAGE}}
-#          cache: 'maven'
 #
-#      - name: Setup Xcode
-#        uses: maxim-lobanov/setup-xcode@v1
+#      - name: Maven Repository Cache
+#        uses: actions/cache@v6
 #        with:
-#          xcode-version: latest-stable
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
 #
 #      - name: Download Artifacts
 #        uses: actions/download-artifact@v8
 #        with:
-#          name: soniccandle-artifacts
+#          name: build
 #          path: target
 #
-#      - name: UI Tests
+#      - name: Generate Screenshots
 #        run: |
-#          mvn ${{env.MAVEN_PARMS}} -P testui verify
+#          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -Pscreenshots1x package
 #
-#      - name: MacOS Icon Pack
+#      - name: Publish Screenshots
 #        run: |
-#          cd target/main/images
-#          mkdir icons.iconset
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p /opt/acm/web/screenshots/mod/sonic;"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -Br target/screenshots/* ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:/opt/acm/web/screenshots/mod/sonic 2>&1
 #
-#          cp ${ACM_PRODUCT}.png icons.iconset/icon512x512@2x.png
-#          sips -z 512 512 ${ACM_PRODUCT}.png --out icons.iconset/icon_512x512.png
-#          sips -z 512 512 ${ACM_PRODUCT}.png --out icons.iconset/icon_256x256@2x.png
-#          sips -z 256 256 ${ACM_PRODUCT}.png --out icons.iconset/icon_256x256.png
-#          sips -z 256 256 ${ACM_PRODUCT}.png --out icons.iconset/icon_128x128@2x.png
-#          sips -z 128 128 ${ACM_PRODUCT}.png --out icons.iconset/icon_128x128.png
-#          sips -z 128 128 ${ACM_PRODUCT}.png --out icons.iconset/icon_64x64@2x.png
-#          sips -z 64 64 ${ACM_PRODUCT}.png --out icons.iconset/icon_64x64.png
-#          sips -z 64 64 ${ACM_PRODUCT}.png --out icons.iconset/icon_32x32@2x.png
-#          sips -z 32 32 ${ACM_PRODUCT}.png --out icons.iconset/icon_32x32.png
-#          sips -z 32 32 ${ACM_PRODUCT}.png --out icons.iconset/icon_16x16@2x.png
-#          sips -z 16 16 ${ACM_PRODUCT}.png --out icons.iconset/icon_16x16.png
-#
-#          iconutil -c icns icons.iconset
-#          rm -R icons.iconset
-#          cd -
-#
-#      # For help building the MacOS icon pack
-#      # https://codetinkering.com/how-to-use-jpackage-tool-cli-for-macos-apps/#notes-about-macos-application-icons
-#      # target/main/images/${ACM_PRODUCT}.icns
-#
-#      - name: Build Packs
-#        run: |
-#          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -P packs verify
-#
-#      - name: Publish Install Pack
-#        run: |
-#          scp -B target/jpackage/*.dmg ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.dmg 2>&1
-#      #    scp -B target/jpackage/*.pkg ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM} 2>&1
-#
-#      #      - name: Publish Install Pack (izpack)
-#      #        run: |
-#      #          scp -B target/*install.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.jar 2>&1
-#
-#      - name: Publish Product Pack
-#        run: |
-#          scp -B target/*product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.jar 2>&1
-#
-#      - name: Publish Product Card
-#        run: |
-#          scp -B target/main/java/META-INF/*.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.card 2>&1
-#
-#  windows:
+#  screenshots2x:
 #    needs: build
-#    name: Pack Windows Binaries
-#    runs-on: windows-latest
-#    timeout-minutes: 30
+#    name: Screenshots 2x
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 5
 #    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/main' || github.base_ref == 'refs/heads/stable'
 #    env:
-#      PRODUCT_PLATFORM: "windows"
+#      ACM_PLATFORM: "linux"
+#      XVFB_PARMS: "-screen 0 3840x2160x24 -nolisten unix"
 #    steps:
 #      - name: Fetch sources
 #        uses: actions/checkout@v7
@@ -370,54 +237,507 @@ jobs:
 #        run: |
 #          source .github/config.sh
 #
-#      # Not needed on Windows
-#      #- name: Set up Virtual Display
-#      #  run: |
-#      #    Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+#      - name: Set up Virtual Display
+#        run: |
+#          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+#
+#      - name: Set up Java
+#        uses: actions/setup-java@v5
+#        with:
+#          distribution: ${{env.JAVA_DISTRO}}
+#          java-version: ${{env.JAVA_VERSION}}
+#          java-package: ${{env.JAVA_PACKAGE}}
+#
+#      - name: Maven Repository Cache
+#        uses: actions/cache@v6
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+#
+#      - name: Download Artifacts
+#        uses: actions/download-artifact@v8
+#        with:
+#          name: build
+#          path: target
+#
+#      - name: Generate Screenshots
+#        run: |
+#          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -Pscreenshots2x package
+#
+#      - name: Publish Screenshots
+#        run: |
+#          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p /opt/acm/web/screenshots/mod/sonic;"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -Br target/screenshots/* ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:/opt/acm/web/screenshots/mod/sonic 2>&1
+
+  packs:
+    needs: build
+    name: Module Packs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/main' || github.base_ref == 'refs/heads/stable'
+    env:
+      ACM_PLATFORM: "linux"
+    steps:
+      - name: Fetch sources
+        uses: actions/checkout@v7
+
+      - name: Fetch CI/CD resources
+        uses: actions/checkout@v7
+        with:
+          repository: acromere/canoe
+          path: .github
+
+      - name: Configuration
+        shell: bash
+        run: |
+          source .github/config.sh
+
+      - name: Set up Virtual Display
+        run: |
+          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: ${{env.JAVA_DISTRO}}
+          java-version: ${{env.JAVA_VERSION}}
+          java-package: ${{env.JAVA_PACKAGE}}
+
+      - name: Maven Repository Cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: build
+          path: target
+
+      - name: UX Tests
+        run: |
+          mvn ${{env.MAVEN_PARMS}} verify -P testui
+
+      - name: Generate Packs
+        run: |
+          mvn ${{env.MAVEN_PARMS}} verify -P packs -Dmaven.test.skip=true
+
+      - name: Publish Product Pack
+        run: |
+          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
+          if [ $? -ne 0 ]; then exit 1; fi
+          scp -B target/*product.jar ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
+
+      - name: Publish Product Card
+        run: |
+          ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
+          if [ $? -ne 0 ]; then exit 1; fi
+          scp -B target/main/java/META-INF/*.card ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
+
+#jobs:
+#  build:
+#    name: Build, Test, Pack
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 10
+#    steps:
+#      - name: Fetch sources
+#        uses: actions/checkout@v7
+#
+#      - name: Set up Virtual Display
+#        run: |
+#          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+#
+#      - name: Set up FFMPEG
+#        uses: FedericoCarboni/setup-ffmpeg@v3
+#        with:
+#          ffmpeg-version: release
 #
 #      - name: Set up Java
 #        uses: actions/setup-java@v6
 #        with:
 #          distribution: ${{env.JAVA_DISTRO}}
 #          java-version: ${{env.JAVA_VERSION}}
-#          java-package: ${{env.JAVA_PACKAGE}}
-#          cache: 'maven'
 #
-#      - name: Download Artifacts
+#      - name: Maven Repository Cache
+#        uses: actions/cache@v6
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+#
+#      - name: Compile
+#        run: |
+#          mvn ${{env.MAVEN_PARMS}} compile
+#
+#      - name: Unit Tests
+#        run: |
+#          mvn ${{env.MAVEN_PARMS}} test
+#
+#      - name: Package
+#        run: |
+#          mvn ${{env.MAVEN_PARMS}} package -Dmaven.test.skip=true
+#
+#      - name: Build Module Pack
+#        run: |
+#          mvn ${{env.MAVEN_PARMS}} verify -Dmaven.test.skip=true -Ppacks
+#
+#      - name: Get Project Version
+#        id: get_version
+#        run: |
+#          echo "RELEASE_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_ENV
+#
+#      #      What repo should these artifacts be deployed to?
+#      #      - name: Maven Deploy
+#      #        run: |
+#      #          mvn ${{env.MAVEN_PARMS}} deploy -Dmaven.test.skip=true
+#
+#      - name: Upload Artifact
+#        uses: actions/upload-artifact@v7
+#        with:
+#          name: soniccandle-artifacts
+#          path: |
+#            src/main/etc/market/catalog.card
+#            src/main/etc/market/soniccandle-icon.png
+#            target/main/java/META-INF/product.card
+#            target/product.jar
+#
+#  publish:
+#    name: Publish to Market
+#    runs-on: ubuntu-latest
+#    needs: build
+#    if: github.ref == 'refs/heads/main' && github.actor != 'dependabot[bot]'
+#    steps:
+#      - run: mkdir build
+#
+#      - name: Configure SSH
+#        shell: bash
+#        env:
+#          DEPLOYMENT_KEY: ${{ secrets.SSH_KEY }}
+#          KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+#        run: |
+#          mkdir ~/.ssh
+#          printf %s "$DEPLOYMENT_KEY" > ~/.ssh/id_rsa
+#          printf %s "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+#          chmod 600 ~/.ssh/id_rsa
+#
+#      - name: Download Artifact
+#        uses: actions/download-artifact@v8
+#        with:
+#          name: soniccandle-artifacts
+#
+#      - name: Deploy catalog card
+#        run: |
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest;"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -r src/main/etc/market/catalog.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/catalog
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/catalog;"
+#
+#      - name: Deploy catalog icon
+#        run: |
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest;"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/icon
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/icon;"
+#
+#      - name: Deploy module pack
+#        run: |
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -r target/product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/pack
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/pack;"
+#
+#      - name: Deploy module card
+#        run: |
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -r target/main/java/META-INF/product.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/card
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/card;"
+#
+#      - name: Deploy module icon
+#        run: |
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon
+#          if [ $? -ne 0 ]; then exit 1; fi
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon;"
+#
+#      - name: Support MacOS and Windows
+#        run: |
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/hypersynesthesia/linux /var/www/html/download/xenon/market/latest/hypersynesthesia/macos"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/hypersynesthesia/linux /var/www/html/download/xenon/market/latest/hypersynesthesia/windows"
+#
+## screenshots1x:
+#
+## screenshots2x:
+#
+#  linux:
+#    needs: build
+#    name: Pack Linux Binaries
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 30
+#    if: github.ref == 'refs/heads/main' && github.actor != 'dependabot[bot]'
+#    env:
+#      PRODUCT_PLATFORM: "linux"
+#    steps:
+#      - name: Fetch sources
+#        uses: actions/checkout@v7
+#
+#      - name: Set up Virtual Display
+#        run: |
+#          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+#
+#      - name: Set up FFMPEG
+#        uses: FedericoCarboni/setup-ffmpeg@v3
+#        with:
+#          ffmpeg-version: release
+#
+#      - name: Set up Java
+#        uses: actions/setup-java@v6
+#        with:
+#          distribution: ${{env.JAVA_DISTRO}}
+#          java-version: ${{env.JAVA_VERSION}}
+#
+#      - name: Maven Repository Cache
+#        uses: actions/cache@v6
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+#
+#      - name: Configure SSH
+#        shell: bash
+#        env:
+#          DEPLOYMENT_KEY: ${{ secrets.SSH_KEY }}
+#          KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+#        run: |
+#          mkdir ~/.ssh
+#          printf %s "$DEPLOYMENT_KEY" > ~/.ssh/id_rsa
+#          printf %s "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+#          chmod 600 ~/.ssh/id_rsa
+#
+#      # This only gets the artifacts from the previous job
+#      - name: Download Artifact
 #        uses: actions/download-artifact@v8
 #        with:
 #          name: soniccandle-artifacts
 #          path: target
 #
+#      # NEXT Modify the artifacts
+#      - name: Modify the Xenon jar file
+#        run: |
+#          ls -al target
+##          mkdir ./target/rebrand
+##          unzip -d ./target/product.jar # The hypersynesthesia jar file
+#
 #      - name: UI Tests
-#        shell: bash
 #        run: |
 #          mvn ${{env.MAVEN_PARMS}} -P testui verify
 #
-#      - name: Build Packs
-#        shell: bash
+#      - name: Build Application Pack
 #        run: |
-#          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -P packs verify
+#          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -P app-pack verify
 #
-#      # JPackage uses Wix 3.x in Java 11, 17, 21
 #      - name: Publish Install Pack
-#        shell: bash
+#        if: ${{ github.actor != 'dependabot[bot]' }}
 #        run: |
-#          scp -B target/jpackage/*.msi ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.msi 2>&1
-#        # scp -B target/jpackage/*.exe ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.exe 2>&1
+#          scp -B target/jpackage/*.deb ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.deb 2>&1
+#      #    scp -B target/jpackage/*.rpm ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.rpm 2>&1
 #
-#      #      # Originally implemented with IzPack
 #      #      - name: Publish Install Pack (izpack)
-#      #        shell: bash
+#      #  if: ${{ github.actor != 'dependabot[bot]' }}
 #      #        run: |
 #      #          scp -B target/*install.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.jar 2>&1
 #
 #      - name: Publish Product Pack
-#        shell: bash
+#        if: ${{ github.actor != 'dependabot[bot]' }}
 #        run: |
 #          scp -B target/*product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.jar 2>&1
 #
 #      - name: Publish Product Card
-#        shell: bash
+#        if: ${{ github.actor != 'dependabot[bot]' }}
 #        run: |
 #          scp -B target/main/java/META-INF/*.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.card 2>&1
+#
+##  macos:
+##    needs: build
+##    name: Pack Mac OS Binaries
+##    runs-on: macos-latest
+##    timeout-minutes: 30
+##    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/main' || github.base_ref == 'refs/heads/stable'
+##    env:
+##      PRODUCT_PLATFORM: "macosx"
+##    steps:
+##      - name: Fetch sources
+##        uses: actions/checkout@v7
+##
+##      - name: Fetch CI/CD resources
+##        uses: actions/checkout@v7
+##        with:
+##          repository: acromere/canoe
+##          path: .github
+##
+##      - name: Configuration
+##        shell: bash
+##        run: |
+##          source .github/config.sh
+##
+##      - name: Set up Virtual Display
+##        run: |
+##          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+##
+##      - name: Set up Java
+##        uses: actions/setup-java@v6
+##        with:
+##          distribution: ${{env.JAVA_DISTRO}}
+##          java-version: ${{env.JAVA_VERSION}}
+##          java-package: ${{env.JAVA_PACKAGE}}
+##          cache: 'maven'
+##
+##      - name: Setup Xcode
+##        uses: maxim-lobanov/setup-xcode@v1
+##        with:
+##          xcode-version: latest-stable
+##
+##      - name: Download Artifacts
+##        uses: actions/download-artifact@v8
+##        with:
+##          name: soniccandle-artifacts
+##          path: target
+##
+##      - name: UI Tests
+##        run: |
+##          mvn ${{env.MAVEN_PARMS}} -P testui verify
+##
+##      - name: MacOS Icon Pack
+##        run: |
+##          cd target/main/images
+##          mkdir icons.iconset
+##
+##          cp ${ACM_PRODUCT}.png icons.iconset/icon512x512@2x.png
+##          sips -z 512 512 ${ACM_PRODUCT}.png --out icons.iconset/icon_512x512.png
+##          sips -z 512 512 ${ACM_PRODUCT}.png --out icons.iconset/icon_256x256@2x.png
+##          sips -z 256 256 ${ACM_PRODUCT}.png --out icons.iconset/icon_256x256.png
+##          sips -z 256 256 ${ACM_PRODUCT}.png --out icons.iconset/icon_128x128@2x.png
+##          sips -z 128 128 ${ACM_PRODUCT}.png --out icons.iconset/icon_128x128.png
+##          sips -z 128 128 ${ACM_PRODUCT}.png --out icons.iconset/icon_64x64@2x.png
+##          sips -z 64 64 ${ACM_PRODUCT}.png --out icons.iconset/icon_64x64.png
+##          sips -z 64 64 ${ACM_PRODUCT}.png --out icons.iconset/icon_32x32@2x.png
+##          sips -z 32 32 ${ACM_PRODUCT}.png --out icons.iconset/icon_32x32.png
+##          sips -z 32 32 ${ACM_PRODUCT}.png --out icons.iconset/icon_16x16@2x.png
+##          sips -z 16 16 ${ACM_PRODUCT}.png --out icons.iconset/icon_16x16.png
+##
+##          iconutil -c icns icons.iconset
+##          rm -R icons.iconset
+##          cd -
+##
+##      # For help building the MacOS icon pack
+##      # https://codetinkering.com/how-to-use-jpackage-tool-cli-for-macos-apps/#notes-about-macos-application-icons
+##      # target/main/images/${ACM_PRODUCT}.icns
+##
+##      - name: Build Packs
+##        run: |
+##          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -P packs verify
+##
+##      - name: Publish Install Pack
+##        run: |
+##          scp -B target/jpackage/*.dmg ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.dmg 2>&1
+##      #    scp -B target/jpackage/*.pkg ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM} 2>&1
+##
+##      #      - name: Publish Install Pack (izpack)
+##      #        run: |
+##      #          scp -B target/*install.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.jar 2>&1
+##
+##      - name: Publish Product Pack
+##        run: |
+##          scp -B target/*product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.jar 2>&1
+##
+##      - name: Publish Product Card
+##        run: |
+##          scp -B target/main/java/META-INF/*.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.card 2>&1
+##
+##  windows:
+##    needs: build
+##    name: Pack Windows Binaries
+##    runs-on: windows-latest
+##    timeout-minutes: 30
+##    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/main' || github.base_ref == 'refs/heads/stable'
+##    env:
+##      PRODUCT_PLATFORM: "windows"
+##    steps:
+##      - name: Fetch sources
+##        uses: actions/checkout@v7
+##
+##      - name: Fetch CI/CD resources
+##        uses: actions/checkout@v7
+##        with:
+##          repository: acromere/canoe
+##          path: .github
+##
+##      - name: Configuration
+##        shell: bash
+##        run: |
+##          source .github/config.sh
+##
+##      # Not needed on Windows
+##      #- name: Set up Virtual Display
+##      #  run: |
+##      #    Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+##
+##      - name: Set up Java
+##        uses: actions/setup-java@v6
+##        with:
+##          distribution: ${{env.JAVA_DISTRO}}
+##          java-version: ${{env.JAVA_VERSION}}
+##          java-package: ${{env.JAVA_PACKAGE}}
+##          cache: 'maven'
+##
+##      - name: Download Artifacts
+##        uses: actions/download-artifact@v8
+##        with:
+##          name: soniccandle-artifacts
+##          path: target
+##
+##      - name: UI Tests
+##        shell: bash
+##        run: |
+##          mvn ${{env.MAVEN_PARMS}} -P testui verify
+##
+##      - name: Build Packs
+##        shell: bash
+##        run: |
+##          mvn ${{env.MAVEN_PARMS}} -Dmaven.test.skip=true -P packs verify
+##
+##      # JPackage uses Wix 3.x in Java 11, 17, 21
+##      - name: Publish Install Pack
+##        shell: bash
+##        run: |
+##          scp -B target/jpackage/*.msi ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.msi 2>&1
+##        # scp -B target/jpackage/*.exe ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.exe 2>&1
+##
+##      #      # Originally implemented with IzPack
+##      #      - name: Publish Install Pack (izpack)
+##      #        shell: bash
+##      #        run: |
+##      #          scp -B target/*install.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/install.jar 2>&1
+##
+##      - name: Publish Product Pack
+##        shell: bash
+##        run: |
+##          scp -B target/*product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.jar 2>&1
+##
+##      - name: Publish Product Card
+##        shell: bash
+##        run: |
+##          scp -B target/main/java/META-INF/*.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:${PRODUCT_DEPLOY_PATH}/${PRODUCT_PLATFORM}/product.card 2>&1
