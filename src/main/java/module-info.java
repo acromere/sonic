@@ -1,7 +1,7 @@
 import com.acromere.xenon.Module;
 import com.dakkra.hypersynesthesia.HyperSynesthesia;
 
-module com.dakkra.hypersynthesthesia {
+module com.acromere.soniccandle {
 	requires static lombok;
 	requires static org.jspecify;
 
