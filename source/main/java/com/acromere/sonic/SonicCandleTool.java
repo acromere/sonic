@@ -77,7 +77,7 @@ public class SonicCandleTool extends GuidedTool {
 
 		// Set up the rendering components
 		renderPane = new RenderPane();
-		Label name = new Label( "HyperSynesthesia" );
+		Label name = new Label( "Sonic Candle" );
 		name.setStyle( "-fx-font-size: 100px" + "; -fx-font-weight: bold" + "; -fx-text-fill: #000000; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 10, 10);" );
 		renderPane.setMinSize( width, height );
 		renderPane.setPrefSize( width, height );

@@ -16,13 +16,13 @@ public class SonicCandle extends Module {
 	@Override
 	public void register() {
 		super.register();
-		log.atInfo().log( "Registering HyperSynesthesia");
+		log.atInfo().log( "Registering Sonic Candle");
 	}
 
 	@Override
 	public void startup() throws Exception {
 		super.startup();
-		log.atInfo().log( "Initializing HyperSynesthesia");
+		log.atInfo().log( "Initializing Sonic Candle");
 
 		// TODO Register an icon to represent a music render project file
 
@@ -35,7 +35,7 @@ public class SonicCandle extends Module {
 	@Override
 	public void shutdown() throws Exception {
 		super.shutdown();
-		log.atInfo().log( "Closing HyperSynesthesia");
+		log.atInfo().log( "Closing Sonic Candle");
 
 		unregisterTool( projectResourceType, SonicCandleTool2.class );
 		unregisterResourceType( projectResourceType );
@@ -44,6 +44,6 @@ public class SonicCandle extends Module {
 	@Override
 	public void unregister() {
 		super.unregister();
-		log.atInfo().log( "UnRegistering HyperSynesthesia");
+		log.atInfo().log( "UnRegistering Sonic Candle");
 	}
 }

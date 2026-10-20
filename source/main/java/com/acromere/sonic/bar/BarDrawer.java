@@ -1,6 +1,6 @@
 /*
 Copyright 2018 Ryan Schroeder
-Copyright 2025 Mark Soderquist - Modified for use in HyperSynesthesia
+Copyright 2025 Mark Soderquist - Modified for use in Sonic Candle
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

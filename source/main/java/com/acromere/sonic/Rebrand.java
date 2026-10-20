@@ -8,11 +8,11 @@ public class Rebrand implements Rebrandable {
 
 	public void register( XenonProgram xenon ) {
 		// Register rebranding resources like fonts, colors, and icons
-		xenon.getIconLibrary().register( "hypersynesthesia", new BrokenIcon() );
+		xenon.getIconLibrary().register( "soniccandle", new BrokenIcon() );
 	}
 
 	public void unregister( XenonProgram xenon) {
-		xenon.getIconLibrary().unregister( "hypersynesthesia", new BrokenIcon() );
+		xenon.getIconLibrary().unregister( "soniccandle", new BrokenIcon() );
 	}
 
 }
