@@ -2,8 +2,6 @@
 build/
 target/
 !gradle/wrapper/gradle-wrapper.jar
-!**/source/main/**/build/
-!**/source/test/**/build/
 
 ### IntelliJ IDEA ###
 .idea/
@@ -18,25 +16,6 @@ target/
 out/
 !**/source/main/**/out/
 !**/source/test/**/out/
-
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/source/main/**/bin/
-!**/source/test/**/bin/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
 
 ### VS Code ###
 .vscode/
