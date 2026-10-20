@@ -13,7 +13,7 @@
 
 	<groupId>com.acromere</groupId>
 	<artifactId>sonic</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<organization>
@@ -96,12 +96,12 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>src/main/java</sourceDirectory>
-		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<sourceDirectory>source/main/java</sourceDirectory>
+		<testSourceDirectory>source/test/java</testSourceDirectory>
 
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>source/main/resources</directory>
 				<filtering>false</filtering>
 				<excludes>
 					<exclude>**/*.card</exclude>
@@ -111,7 +111,7 @@
 				</excludes>
 			</resource>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>source/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
 					<include>**/*.card</include>
@@ -124,7 +124,7 @@
 
 		<testResources>
 			<testResource>
-				<directory>src/test/resources</directory>
+				<directory>source/test/resources</directory>
 			</testResource>
 		</testResources>
 
@@ -316,7 +316,7 @@
 									<encoding>UTF-8</encoding>
 									<resources>
 										<resource>
-											<directory>${basedir}/src/main/jpackage</directory>
+											<directory>${basedir}/source/main/jpackage</directory>
 											<filtering>true</filtering>
 											<excludes>
 												<exclude>bin</exclude>
@@ -336,7 +336,7 @@
 									<encoding>UTF-8</encoding>
 									<resources>
 										<resource>
-											<directory>${basedir}/src/main/images</directory>
+											<directory>${basedir}/source/main/images</directory>
 											<filtering>false</filtering>
 											<excludes>
 												<exclude>bin</exclude>

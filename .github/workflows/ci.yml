@@ -144,7 +144,7 @@ jobs:
           ssh -t ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com "mkdir -p ${{env.PRODUCT_DEPLOY_PATH}};"
           if [ $? -ne 0 ]; then exit 1; fi
           #scp -B target/main/images/product*.png ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
-          scp -B src/main/images/product*.png ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
+          scp -B source/main/images/product*.png ${{env.ACM_XENON_REPO_USERNAME}}@acromere.com:${PRODUCT_DEPLOY_PATH} 2>&1
 
       - name: Publish JavaDoc
         run: |
@@ -404,8 +404,8 @@ jobs:
 #        with:
 #          name: soniccandle-artifacts
 #          path: |
-#            src/main/etc/market/catalog.card
-#            src/main/etc/market/soniccandle-icon.png
+#            source/main/etc/market/catalog.card
+#            source/main/etc/market/soniccandle-icon.png
 #            target/main/java/META-INF/product.card
 #            target/product.jar
 #
@@ -437,7 +437,7 @@ jobs:
 #        run: |
 #          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest;"
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          scp -r src/main/etc/market/catalog.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/catalog
+#          scp -r source/main/etc/market/catalog.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/catalog
 #          if [ $? -ne 0 ]; then exit 1; fi
 #          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/catalog;"
 #
@@ -445,7 +445,7 @@ jobs:
 #        run: |
 #          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest;"
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/icon
+#          scp -r source/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/icon
 #          if [ $? -ne 0 ]; then exit 1; fi
 #          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/icon;"
 #
@@ -469,7 +469,7 @@ jobs:
 #        run: |
 #          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          scp -r src/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon
+#          scp -r source/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon
 #          if [ $? -ne 0 ]; then exit 1; fi
 #          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon;"
 #
