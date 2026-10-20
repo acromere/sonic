@@ -37,12 +37,12 @@
 		}
 	],
 	"contributors": [],
-	"rebrandClass": "com.dakkra.hypersynesthesia.Rebrand",
+	"rebrandClass": "com.acromere.sonic.Rebrand",
 	"moduleClasses": [
-		"com.dakkra.hypersynesthesia.HyperSynesthesia"
+		"com.acromere.sonic.SonicCandle"
 	],
 	"rebrand" : {
-		"splashScreenBackgroundClass" : "com.dakkra.hypersynesthesia.HSLogo",
+		"splashScreenBackgroundClass" : "com.acromere.sonic.HSLogo",
 		"splashScreenTitleFontSize" : 70
 	}
 }

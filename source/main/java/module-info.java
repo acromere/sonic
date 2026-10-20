@@ -1,5 +1,5 @@
+import com.acromere.sonic.SonicCandle;
 import com.acromere.xenon.Module;
-import com.dakkra.hypersynesthesia.HyperSynesthesia;
 
 module com.acromere.soniccandle {
 	requires static lombok;
@@ -13,12 +13,12 @@ module com.acromere.soniccandle {
 	requires com.acromere.zevra;
 	requires java.desktop;
 
-	exports com.dakkra.hypersynesthesia to com.acromere.xenon;
-	exports com.dakkra.hypersynesthesia.bar to com.acromere.xenon;
+	exports com.acromere.sonic to com.acromere.xenon;
+	exports com.acromere.sonic.bar to com.acromere.xenon;
 
 	// Public resources
-	opens com.dakkra.hypersynesthesia.bundles;
+	opens com.acromere.sonic.bundles;
 	//opens com.dakkra.hypersynesthesia.settings;
 
-	provides Module with HyperSynesthesia;
+	provides Module with SonicCandle;
 }
