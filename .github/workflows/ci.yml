@@ -33,7 +33,7 @@ env:
   JAVA_VERSION: "25.0.1"
   MAVEN_PARMS: "-B -U -V --settings .github/settings.xml --file pom.xml"
   XVFB_PARMS: "-screen 0 1920x1080x24 -nolisten unix"
-  # PRODUCT_DEPLOY_PATH: "/var/www/html/download/xenon/market/latest/sonic"
+  # PRODUCT_DEPLOY_PATH: "/var/www/html/download/xenon/market/latest/hypersynesthesia"
 
 jobs:
   build:
@@ -451,32 +451,32 @@ jobs:
 #
 #      - name: Deploy module pack
 #        run: |
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/sonic/linux/product;"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          scp -r target/product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/sonic/linux/product/pack
+#          scp -r target/product.jar ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/pack
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/sonic/linux/product/pack;"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/pack;"
 #
 #      - name: Deploy module card
 #        run: |
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/sonic/linux/product;"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          scp -r target/main/java/META-INF/product.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/sonic/linux/product/card
+#          scp -r target/main/java/META-INF/product.card ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/card
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/sonic/linux/product/card;"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/card;"
 #
 #      - name: Deploy module icon
 #        run: |
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/sonic/linux/product;"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "mkdir -p /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product;"
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          scp -r source/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/sonic/linux/product/icon
+#          scp -r source/main/etc/market/soniccandle-icon.png ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}}:/var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon
 #          if [ $? -ne 0 ]; then exit 1; fi
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/sonic/linux/product/icon;"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "chmod 644 /var/www/html/download/xenon/market/latest/hypersynesthesia/linux/product/icon;"
 #
 #      - name: Support MacOS and Windows
 #        run: |
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/sonic/linux /var/www/html/download/xenon/market/latest/sonic/macos"
-#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/sonic/linux /var/www/html/download/xenon/market/latest/sonic/windows"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/hypersynesthesia/linux /var/www/html/download/xenon/market/latest/hypersynesthesia/macos"
+#          ssh -t ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ln -sf /var/www/html/download/xenon/market/latest/hypersynesthesia/linux /var/www/html/download/xenon/market/latest/hypersynesthesia/windows"
 #
 ## screenshots1x:
 #
@@ -540,7 +540,7 @@ jobs:
 #        run: |
 #          ls -al target
 ##          mkdir ./target/rebrand
-##          unzip -d ./target/product.jar # The sonic jar file
+##          unzip -d ./target/product.jar # The hypersynesthesia jar file
 #
 #      - name: UI Tests
 #        run: |
