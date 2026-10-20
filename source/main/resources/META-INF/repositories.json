@@ -2,8 +2,8 @@
 	{
 		"internalId": "ltrlhbwmthvhtzzn",
 		"name": "${project.organization.name} Stable",
-		"url": "https://hypersynesthesia.com/download/xenon/market/stable",
-		"icon": "https://hypersynesthesia.com/download/xenon/market/latest/hypersynesthesia/linux/product/icon",
+		"url": "https://soniccandle.com/download/xenon/market/stable",
+		"icon": "https://soniccandle.com/download/xenon/market/latest/sonic/linux/product/icon",
 		"icons": [
 			"provider",
 			"https://www.acromere.com/download/stable/acromere/provider/icon"
@@ -15,8 +15,8 @@
 	{
 		"internalId": "btlzlsvhwvtzdblv",
 		"name": "${project.organization.name} Latest",
-		"url": "https://hypersynesthesia.com/download/xenon/market/latest",
-		"icon": "https://hypersynesthesia.com/download/xenon/market/latest/hypersynesthesia/linux/product/icon",
+		"url": "https://soniccandle.com/download/xenon/market/latest",
+		"icon": "https://soniccandle.com/download/xenon/market/latest/sonic/linux/product/icon",
 		"icons": [
 			"provider",
 			"https://www.acromere.com/download/stable/acromere/provider/icon"

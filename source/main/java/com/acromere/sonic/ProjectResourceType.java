@@ -9,12 +9,12 @@ import com.acromere.xenon.resource.exception.ResourceException;
 public class ProjectResourceType extends ResourceType {
 
 	public ProjectResourceType( XenonProgramProduct product ) {
-		super( product, "hypersynesthesia" );
+		super( product, "soniccandle" );
 	}
 
 	@Override
 	public String getKey() {
-		return "com.hypersynesthesia.project";
+		return "com.soniccandle.project";
 	}
 
 	@Override
