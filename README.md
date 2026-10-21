@@ -1,4 +1,4 @@
-# <img src="https://acromere.com/download/latest/sonic/product/icon" alt="SON" width="64" height="64"> Sonic Candle - Video for your music
+# Sonic Candle - Video for your music
 
 [![Sonic Candle CI](https://github.com/acromere/sonic/actions/workflows/ci.yml/badge.svg)](https://github.com/acromere/sonic/actions/workflows/ci.yml)
 
