@@ -4,7 +4,7 @@
 
 "Given a music file, generates a video file with a visualization of frequency spectrum bars generated for the music. Outputs high-quality, rendered video. Intended for publishing your own music on YouTube and stuff =)"
 
-[web](https://soniccandle.com), [discord](https://discord.gg/MANggMn2aR)
+[web](https://soniccandle.com)
 
 ## History
 
