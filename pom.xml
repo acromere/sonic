@@ -141,29 +141,39 @@
 				</configuration>
 			</plugin>
 
-<!--			<plugin>-->
-<!--				<groupId>com.acromere</groupId>-->
-<!--				<artifactId>cameo</artifactId>-->
-<!--				<version>${cameo.version}</version>-->
-<!--				<executions>-->
-<!--					<execution>-->
-<!--						<id>render</id>-->
-<!--						<phase>prepare-package</phase>-->
-<!--						<goals>-->
-<!--							<goal>render</goal>-->
-<!--						</goals>-->
-<!--						<configuration>-->
-<!--							<images>-->
-<!--								<image>-->
-<!--									<class>com.acromere.sonic.SonicCandleIcon</class>-->
-<!--									<target>${images-folder}/product.png</target>-->
-<!--									<theme>light</theme>-->
-<!--								</image>-->
-<!--							</images>-->
-<!--						</configuration>-->
-<!--					</execution>-->
-<!--				</executions>-->
-<!--			</plugin>-->
+			<plugin>
+				<groupId>com.acromere</groupId>
+				<artifactId>cameo</artifactId>
+				<version>${cameo.version}</version>
+				<executions>
+					<execution>
+						<id>render</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>render</goal>
+						</goals>
+						<configuration>
+							<images>
+								<image>
+									<class>com.acromere.sonic.SonicCandleIcon</class>
+									<target>${images-folder}/product.png</target>
+									<theme>light</theme>
+								</image>
+								<image>
+									<class>com.acromere.sonic.SonicCandleIcon</class>
+									<target>${images-folder}/product-light.png</target>
+									<theme>light</theme>
+								</image>
+								<image>
+									<class>com.acromere.sonic.SonicCandleIcon</class>
+									<target>${images-folder}/product-dark.png</target>
+									<theme>dark</theme>
+								</image>
+							</images>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
     </plugins>
 	</build>
