@@ -158,6 +158,8 @@
 									<class>com.acromere.sonic.SonicCandleIcon</class>
 									<target>${images-folder}/product.png</target>
 									<theme>light</theme>
+									<width>1024</width>
+									<height>1024</height>
 								</image>
 								<image>
 									<class>com.acromere.sonic.SonicCandleIcon</class>
