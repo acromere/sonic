@@ -4,6 +4,7 @@ import com.acromere.zerra.color.Colors;
 import com.acromere.zerra.image.Proof;
 import com.acromere.zerra.image.SvgIcon;
 import javafx.scene.paint.*;
+import org.jspecify.annotations.NonNull;
 
 public class SonicCandleIcon extends SvgIcon {
 
@@ -19,6 +20,13 @@ public class SonicCandleIcon extends SvgIcon {
 		Paint innerFill = new LinearGradient( 4, 16, 28, 16, false, CycleMethod.NO_CYCLE, new Stop( 0, leftFill ), new Stop( 1, rightFill ) );
 		fill( innerOutline, innerFill );
 
+		Color leftBarFill = Colors.parse( "#7A4B06" );
+		Color rightBarFill = Colors.parse( "#E5C038" );
+		Paint barFill = new LinearGradient( 4, 16, 28, 16, false, CycleMethod.NO_CYCLE, new Stop( 0, leftBarFill ), new Stop( 1, rightBarFill ) );
+		fill( getBars(), barFill );
+	}
+
+	private @NonNull String getBars() {
 		int index = 0;
 		String bars = bar( index++, 4 );
 		bars += bar( index++, 4 );
@@ -46,16 +54,12 @@ public class SonicCandleIcon extends SvgIcon {
 		bars += bar( index++, 3 );
 		bars += bar( index++, 3.5 );
 		bars += bar( index++, 3.5 );
-
-		Color leftBarFill = Colors.parse( "#7A4B06" );
-		Color rightBarFill = Colors.parse( "#E5C038" );
-		Paint barFill = new LinearGradient( 4, 16, 28, 16, false, CycleMethod.NO_CYCLE, new Stop( 0, leftBarFill ), new Stop( 1, rightBarFill ) );
-		fill( bars, barFill );
+		return bars;
 	}
 
 	private String bar( int index, double size ) {
 		double half = 0.5 * size;
-		return "M" + (4 + index) + "," + (16 - half) + " l0," + size + " l0.6,0 l0,-" + size + " Z ";
+		return "M" + (3.2 + index) + "," + (16 - half) + " l0," + size + " l0.6,0 l0,-" + size + " Z ";
 	}
 
 	public static void main( String[] args ) {
