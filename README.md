@@ -1,10 +1,10 @@
-# <img src="https://acromere.com/download/latest/sonic/product/icon" alt="SON" width="64" height="64"> Sonic Candle - Video for your music
+# Sonic Candle - Video for your music
 
 [![Sonic Candle CI](https://github.com/acromere/sonic/actions/workflows/ci.yml/badge.svg)](https://github.com/acromere/sonic/actions/workflows/ci.yml)
 
 "Given a music file, generates a video file with a visualization of frequency spectrum bars generated for the music. Outputs high-quality, rendered video. Intended for publishing your own music on YouTube and stuff =)"
 
-[web](https://soniccandle.com), [discord](https://discord.gg/MANggMn2aR)
+[web](https://soniccandle.com)
 
 ## History
 
