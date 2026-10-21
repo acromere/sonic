@@ -50,10 +50,10 @@ public class SonicCandleIcon extends SvgIcon {
 		bars += bar( index++, 4 );
 		bars += bar( index++, 5 );
 		bars += bar( index++, 5 );
-		bars += bar( index++, 3 );
-		bars += bar( index++, 3 );
-		bars += bar( index++, 3.5 );
-		bars += bar( index++, 3.5 );
+		bars += bar( index++, 2 );
+		bars += bar( index++, 2 );
+		bars += bar( index++, 2.5 );
+		bars += bar( index++, 2.5 );
 		return bars;
 	}
 
