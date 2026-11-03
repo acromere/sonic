@@ -2,9 +2,9 @@ package com.acromere.sonic;
 
 import com.acromere.xenos.BaseModUiTestCase;
 
-class HyperSynesthesiaTest extends BaseModUiTestCase<SonicCandle> {
+class SonicCandleTest extends BaseModUiTestCase<SonicCandle> {
 
-	protected HyperSynesthesiaTest() {
+	protected SonicCandleTest() {
 		super( SonicCandle.class );
 	}
 
