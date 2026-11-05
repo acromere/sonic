@@ -9,7 +9,7 @@
 	"provider": "${project.organization.name}",
 	"providerUrl": "${project.organization.url}",
 	"inception": "${project.inceptionYear}",
-	"summary": "A module to create videos based on audio input",
+	"summary": "Video for your music",
 	"description": "${project.description}",
 	"copyrightSummary": "(c) 2026 Acromere",
 	"licenseSummary": "${project.name} is under the GPL v3 license",
