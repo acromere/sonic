@@ -142,6 +142,8 @@ public class SonicCandleTool2 extends GuidedTool {
 		grid.add( createGenerateVideoPane(), 0, 3, 2, 1 );
 
 		ScrollPane scrollPane = new ScrollPane( grid );
+		scrollPane.setFitToWidth( true );
+		scrollPane.setFitToHeight( true );
 
 		getChildren().addAll( scrollPane );
 
