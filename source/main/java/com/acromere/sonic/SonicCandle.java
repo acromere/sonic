@@ -28,7 +28,7 @@ public class SonicCandle extends Module {
 
 		registerResourceType( projectResourceType );
 		ToolRegistration registration = new ToolRegistration( this, SonicCandleTool2.class);
-		registration.setName( "HyperSynestheisa Tool" );
+		registration.setName( "Sonic Candle Tool" );
 		registerTool( projectResourceType, registration );
 	}
 
