@@ -7,6 +7,8 @@ import lombok.CustomLog;
 @CustomLog
 public class SonicCandle extends Module {
 
+	public static final String SONICCANDLE = "soniccandle";
+
 	private final ProjectResourceType projectResourceType;
 
 	public SonicCandle() {
@@ -24,7 +26,7 @@ public class SonicCandle extends Module {
 		super.startup();
 		log.atInfo().log( "Initializing Sonic Candle");
 
-		// TODO Register an icon to represent a music render project file
+		registerIcon( SONICCANDLE, new SonicCandleIcon() );
 
 		registerResourceType( projectResourceType );
 		ToolRegistration registration = new ToolRegistration( this, SonicCandleTool2.class);
@@ -39,6 +41,8 @@ public class SonicCandle extends Module {
 
 		unregisterTool( projectResourceType, SonicCandleTool2.class );
 		unregisterResourceType( projectResourceType );
+
+		unregisterIcon( SONICCANDLE, new SonicCandleIcon() );
 	}
 
 	@Override
