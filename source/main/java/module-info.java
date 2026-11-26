@@ -17,6 +17,7 @@ module com.acromere.soniccandle {
 	exports com.acromere.sonic.bar to com.acromere.xenon;
 
 	// Public resources
+	opens com.acromere.sonic;
 	opens com.acromere.sonic.bundles;
 	//opens com.acromere.sonic.settings;
 
