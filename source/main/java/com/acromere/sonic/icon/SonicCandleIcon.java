@@ -1,4 +1,4 @@
-package com.acromere.sonic;
+package com.acromere.sonic.icon;
 
 import com.acromere.zerra.color.Colors;
 import com.acromere.zerra.image.Proof;
