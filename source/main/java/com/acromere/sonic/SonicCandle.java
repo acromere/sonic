@@ -1,5 +1,6 @@
 package com.acromere.sonic;
 
+import com.acromere.sonic.icon.SonicCandleIcon;
 import com.acromere.xenon.Module;
 import com.acromere.xenon.ToolRegistration;
 import lombok.CustomLog;
@@ -48,6 +49,6 @@ public class SonicCandle extends Module {
 	@Override
 	public void unregister() {
 		super.unregister();
-		log.atInfo().log( "UnRegistering Sonic Candle");
+		log.atInfo().log( "Unregistering Sonic Candle");
 	}
 }

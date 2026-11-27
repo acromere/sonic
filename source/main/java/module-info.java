@@ -13,11 +13,12 @@ module com.acromere.soniccandle {
 	requires com.acromere.zevra;
 	requires java.desktop;
 
-	exports com.acromere.sonic to com.acromere.xenon,com.acromere.zerra;
+	exports com.acromere.sonic to com.acromere.xenon;
+	exports com.acromere.sonic.icon to com.acromere.zerra;
 	exports com.acromere.sonic.bar to com.acromere.xenon;
 
 	// Public resources
-	opens com.acromere.sonic;
+	opens com.acromere.sonic.icon;
 	opens com.acromere.sonic.bundles;
 	//opens com.acromere.sonic.settings;
 
